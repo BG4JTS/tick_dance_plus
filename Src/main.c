@@ -62,7 +62,7 @@ int main(void)
 
     // 外设初始化
     sys_clock_init();
-    sys_spi1_init();
+    sys_spi1_init(); // 2MHz
     sys_button_init();
 
     // 创建系统 app 并运行
@@ -95,11 +95,11 @@ static void sys_clock_init(void)
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI | RCC_OSCILLATORTYPE_LSE; /* Select oscillators HSE, HSI, LSI, LSE */
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;                                                                                              /* Enable HSI */
     RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;                                                                                              /* HSI not divided */
-    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_24MHz;                                                                     /* Configure HSI clock as 24MHz */
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_8MHz;                                                                     /* Configure HSI clock as 24MHz */
     RCC_OscInitStruct.HSEState = RCC_HSE_OFF;                                                                                             /* Disable HSE */
     /*RCC_OscInitStruct.HSEFreq = RCC_HSE_16_32MHz;*/
     RCC_OscInitStruct.LSIState = RCC_LSI_OFF; /* Disable LSI */
-    RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+    RCC_OscInitStruct.LSEState = RCC_LSE_OFF;
     RCC_OscInitStruct.LSEDriver = RCC_LSEDRIVE_MEDIUM;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_OFF; /* Disable PLL */
     /*RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;*/
@@ -126,9 +126,12 @@ static void sys_spi1_init(void){
     /*Deinitialize SPI configuration*/
     hspi1_handler.Instance = SPI1;                                  /* SPI1 */
     hspi1_handler.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4; /* Prescaler: 4 */
-    hspi1_handler.Init.Direction = SPI_DIRECTION_1LINE;             /* Full-duplex */
-    hspi1_handler.Init.CLKPolarity = SPI_POLARITY_LOW;              /* Clock polarity: Low */
-    hspi1_handler.Init.CLKPhase = SPI_PHASE_1EDGE;                  /* Data sampling on the first clock edge */
+    // hspi1_handler.Init.Direction = SPI_DIRECTION_2LINES;
+    // hspi1_handler.Init.CLKPolarity = SPI_POLARITY_HIGH;
+    // hspi1_handler.Init.CLKPhase = SPI_PHASE_2EDGE;
+    hspi1_handler.Init.Direction = SPI_DIRECTION_1LINE;
+    hspi1_handler.Init.CLKPolarity = SPI_POLARITY_LOW;
+    hspi1_handler.Init.CLKPhase = SPI_PHASE_1EDGE;
     hspi1_handler.Init.DataSize = SPI_DATASIZE_8BIT;                /* SPI data size: 8-bit */
     hspi1_handler.Init.FirstBit = SPI_FIRSTBIT_MSB;                 /* MSB transmitted first */
     hspi1_handler.Init.NSS = SPI_NSS_SOFT;                          /* NSS hardware output mode */

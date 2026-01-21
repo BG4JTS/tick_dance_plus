@@ -337,7 +337,7 @@ void cmd_cb_ltx_app(uint8_t argc, char *argv[]){
                                     
                                     break;
                             }
-                            LTX_LOG_INFO("Task(%s) set okay\n", argv[2]);
+                            LTX_LOG_INFO("Task(%s) set okay\n", argv[3]);
                             return ;
                         }
                         pTask = &((*pTask)->next);

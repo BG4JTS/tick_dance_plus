@@ -1,7 +1,7 @@
 /**
  * @file ST7305.h
  * @author realTiX
- * @brief ST7305 2.19 inch 全反射显示屏驱动库
+ * @brief ST7305 2.19 inch 全反射显示屏驱动库，支持设置窗口局刷
  *        spi 上限 33.3Mbit/s
  *        局刷最小刷屏单元为 3 个字节，24 个像素
  *        pix 分布（竖屏，122*250，因为 122 不能整除以 12，所以 x 需要偏移 (122%12==0?0:(12-122%12)) = 10 pix）：
@@ -16,10 +16,11 @@
  *        ...                  ...
  *        第250行              [pix2] ...
  * 
- *        搞不懂这个屏幕为什么不做成 120*250 的，为了多刷两列得浪费十列，也就是刷屏效率只有 92%
+ *        搞不懂这个屏幕为什么不做成 120*250 的，为了多刷两列得浪费十列，也就是（全刷）刷屏效率只有 92%
  * 
- * @version 0.1
- * @date 2026-01-16
+ * @version 0.2
+ * @date 2026-01-16 (0.1，初步完成功能)
+ *       2026-01-21 (0.2，修改初始化序列，修改设置窗口)
  * 
  * @copyright Copyright (c) 2026
  * 
@@ -82,6 +83,8 @@ struct st7305_stu {
     uint8_t *full_buffer;
 #endif
 };
+
+extern lcd_init_seq_stu st7305_init_table[];
 
 #ifdef ST7305_NEED_FULL_BUFFER
 int st7305_init(struct st7305_stu *lcd, uint8_t *full_buffer);

@@ -84,7 +84,7 @@ uint32_t heart_beat_count = 0;
 void task_func_heart_beat(void *param){
 
     heart_beat_count ++;
-    // LOG_FMT("Heartbeat: %d\n", heart_beat_count);
+    // LTX_LOG_DEBG("Heartbeat: %d\n", heart_beat_count);
 
 }
 

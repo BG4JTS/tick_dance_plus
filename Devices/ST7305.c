@@ -1,5 +1,6 @@
 #include "ST7305.h"
 
+#if 0 // 这里是官方的默认参数
 lcd_init_seq_stu st7305_init_table[] = {
     {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xD6}}, // NVM Load Control
     {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X17}},
@@ -119,8 +120,112 @@ lcd_init_seq_stu st7305_init_table[] = {
     // 初始化结束
     {LCD_CTRL_OVER, },
 };
+#endif
+
+lcd_init_seq_stu st7305_init_table[] = {
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xD6}}, // NVM Load Control
+    {LCD_CTRL_WRITE_DATA, 2, (const uint8_t []){0X17, 0X02}},
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xD1}}, // Booster Enable
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X01}},
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xC0}}, // Gate Voltage Setting
+    {LCD_CTRL_WRITE_DATA, 2, (const uint8_t []){0X12, 0X0A}}, // VGH=15V VGL=-7.5V
+
+// 电压设置 起始
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xC1}},
+    {LCD_CTRL_WRITE_DATA, 4, (const uint8_t []){0x3C, 0x3E, 0x3C, 0x3C}},
+   
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xC2}},
+    {LCD_CTRL_WRITE_DATA, 4, (const uint8_t []){0x23, 0x21, 0x23, 0x23}},
+   
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xC4}},
+    {LCD_CTRL_WRITE_DATA, 4, (const uint8_t []){0x5A, 0x5C, 0x5A, 0x5A}},
+   
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xC5}},
+    {LCD_CTRL_WRITE_DATA, 4, (const uint8_t []){0x37, 0x35, 0x37, 0x37}},
+// 电压设置 结束
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xD8}}, // HPM=32Hz
+    // {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0XA6}},
+    {LCD_CTRL_WRITE_DATA, 2, (const uint8_t []){0X80, 0XE9}},
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xB2}}, // Frame Rate Control
+    // {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X15}}, //
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X02}}, //
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xB3}}, // Update Period Gate EQ Control in HPM
+    {LCD_CTRL_WRITE_DATA, 10, (const uint8_t []){0XE5, 0XF6, 0X17, 0X77, 0X77, 0X77, 0X77, 0X77, 0X77, 0X71}}, //
+   
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xB4}}, // Update Period Gate EQ Control in LPM
+    {LCD_CTRL_WRITE_DATA, 8, (const uint8_t []){0X05, 0X46, 0X77, 0X77, 0X77, 0X77, 0X76, 0X45}}, //
+
+    // 
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x62}},
+    {LCD_CTRL_WRITE_DATA, 3, (const uint8_t []){0x32, 0x03, 0x1F}},
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xB7}}, // Source EQ Enable
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X13}}, //
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xB0}}, // Gate Line Setting
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X3F}}, // 252 line
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x11}}, // Sleep out
+    {LCD_CTRL_DELAY, 120}, // 延时 120 ms
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xC9}}, // Source Voltage Select
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0x00}}, // VSHP1; VSLP1 ; VSHN1 ; VSLN1
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x36}}, // Memory Data Access Control
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X48}}, //
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x3A}}, // Data Format Select
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X11}}, // 10:4write for 24bit ; 11: 3write for 24bit
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xB9}}, // Gamma Mode Setting
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X20}}, // 20: Mono 00:4GS
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xB8}}, // Panel Setting
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X29}}, //
+
+    // WRITE RAM 122x250
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x2A}}, // Column Address Setting
+    {LCD_CTRL_WRITE_DATA, 2, (const uint8_t []){0X19, 0X23}},
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x2B}}, // Row Address Setting
+    {LCD_CTRL_WRITE_DATA, 2, (const uint8_t []){0X00, 0X7C}},
+
+    // {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x35}}, // TE
+    // {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X00}}, //
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x34}}, // TE off
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xD0}}, // Auto power down
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0XFF}}, //
 
 
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x39}}, // 0x39 low power 0x38 high power
+    // {LCD_CTRL_DELAY, 20}, // 延时 20 ms
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xBB}},
+    {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0x4F}},
+
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x29}}, // DISPLAY ON
+    // {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x20}}, // 关闭反转
+
+    // {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0xC7}}, // ultra low power code
+    // {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0xC1}},
+    // {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0x41}},
+    // {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0x26}},
+
+    {LCD_CTRL_DELAY, 2}, // 延时 2 ms
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x38}}, // 0x39 low power 0x38 high power
+    {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x29}}, // DISPLAY ON
+
+    // 初始化结束
+    {LCD_CTRL_OVER, },
+};
+
+uint8_t st_cmd_buffer[2] = {0, 0};
 void st7305_write_cmd(struct st7305_stu *lcd, uint8_t cmd){
     lcd->write_dc(ST7305_PIN_LEVEL_DC_CMD);
     lcd->transmit_data(&cmd, 1);
@@ -172,7 +277,7 @@ lcd->write_cs(1);
     lcd->write_rst(0);
     lcd->delay_ms(10);
     lcd->write_rst(1);
-    lcd->delay_ms(120);
+    lcd->delay_ms(10);
 
 lcd->write_cs(0);
 
@@ -204,6 +309,9 @@ lcd->write_cs(0);
     return -3;
 }
 
+/**
+ * @brief 设置刷屏的窗口
+ */
 void st7305_set_unit_window(struct st7305_stu *lcd, uint16_t unit_x0, uint16_t unit_y0, uint16_t unit_x1, uint16_t unit_y1){
     if(unit_x0 > LCD_UNIT_WIDTH || unit_x1 > LCD_UNIT_WIDTH || unit_y0 > LCD_UNIT_HEIGHT || unit_y1 > LCD_UNIT_HEIGHT){
         return ;
@@ -215,8 +323,10 @@ void st7305_set_unit_window(struct st7305_stu *lcd, uint16_t unit_x0, uint16_t u
     uint8_t temp[2];
 
     st7305_write_cmd(lcd, 0x2A); // 指定列范围
-    temp[0] = unit_x0 + 0x19; // x 起始
-    temp[1] = unit_x1 + 0x19; // x 结尾
+    // temp[0] = unit_x0 + 0x19; // x 起始
+    // temp[1] = unit_x1 + 0x19; // x 结尾
+    temp[0] = LCD_UNIT_WIDTH-1-unit_x1 + 0x19; // x 起始
+    temp[1] = LCD_UNIT_WIDTH-1-unit_x0 + 0x19; // x 结尾
     st7305_write_data(lcd, temp, 2);
 
     st7305_write_cmd(lcd, 0x2B); // 指定行范围

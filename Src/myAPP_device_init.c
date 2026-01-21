@@ -22,7 +22,9 @@ void myLCD_transmit_data_dma(const uint8_t *buf, uint16_t len);
 void myLCD_pin_init(void);
 // lcd 初始化脚本回调
 void script_cb_lcd_init(struct ltx_Script_stu *script);
-// 绘制 logo 脚本
+// lcd 清屏脚本回调
+void script_cb_lcd_clear(struct ltx_Script_stu *script);
+// 绘制 logo 脚本回调
 void script_cb_draw_logo(struct ltx_Script_stu *script);
 
 // 外部硬件初始化完成事件组回调
@@ -33,6 +35,8 @@ uint8_t lcd_buffer1[512];
 
 // dma 发送完成话题
 struct ltx_Topic_stu topic_spi_tx_over = _LTX_TOPIC_DEAFULT_CONFIG(topic_spi_tx_over);
+// lcd 清屏完成话题
+struct ltx_Topic_stu topic_lcd_clear_over = _LTX_TOPIC_DEAFULT_CONFIG(topic_lcd_clear_over);
 
 // 所有外部硬件初始化完成事件组
 struct ltx_Event_group_stu eventg_device_init_over;
@@ -55,6 +59,8 @@ struct st7305_stu myLCD = {
 
 // 显示屏初始化脚本对象结构体
 struct ltx_Script_stu script_lcd_init;
+// 绘制开机 logo 脚本
+struct ltx_Script_stu script_lcd_clear;
 // 绘制开机 logo 脚本
 struct ltx_Script_stu script_draw_logo;
 
@@ -108,7 +114,6 @@ struct ltx_App_stu app_device_init = {
 };
 
 
-extern lcd_init_seq_stu st7305_init_table[];
 // lcd 初始化脚本回调
 void script_cb_lcd_init(struct ltx_Script_stu *script){
     // if(ltx_Script_get_triger_type(script) == SC_TRIGER_RESET){ // 外部要求此脚本重置，可在这里做释放资源等操作
@@ -139,8 +144,8 @@ void script_cb_lcd_init(struct ltx_Script_stu *script){
             // 释放复位
             myLCD.write_rst(1);
 
-            // 120ms 后初始化
-            ltx_Script_next_step_delay(script, script->step_now + 1, 120);
+            // 10ms 后初始化
+            ltx_Script_next_step_delay(script, script->step_now + 1, 10);
 
             break;
 
@@ -215,7 +220,7 @@ void myLCD_transmit_data(const uint8_t *buf, uint16_t len){
     HAL_StatusTypeDef spi_tx_status = HAL_SPI_Transmit(&hspi1_handler, buf, len, 1000);
     if(spi_tx_status != HAL_OK){
         LTX_LOG_ERRO("Spi tx Error: %d, %d\n", spi_tx_status, hspi1_handler.ErrorCode);
-        ltx_Script_pause(&script_lcd_init);
+        // ltx_Script_pause(&script_lcd_init);
     }
 }
 
@@ -246,6 +251,8 @@ void eventg_cb_device_init_over(struct ltx_Event_group_stu *eventg){
     // 关闭 device_init app
     ltx_App_destroy(&app_device_init);
 
+    // 创建 lcd 清屏脚本
+    ltx_Script_init(&script_lcd_clear, script_cb_lcd_clear, 0);
     // 创建屏幕显示 logo 脚本并运行
     ltx_Script_init(&script_draw_logo, script_cb_draw_logo, 0);
     ltx_Script_resume(&script_draw_logo);
@@ -292,8 +299,11 @@ void script_cb_draw_logo(struct ltx_Script_stu *script){
         case 0: // 将 dma buffer 全填为 1
             for(uint16_t i = 0; i < sizeof(lcd_buffer0); i ++){
                 lcd_buffer0[i] = 0xFF;
-                lcd_buffer1[i] = 0;
             }
+            // 运行清屏脚本并等待完成
+            ltx_Script_reset(&script_lcd_clear, 0);
+            ltx_Script_resume(&script_lcd_clear);
+            ltx_Script_next_step_topic(script, script->step_now + 1, 100, &topic_lcd_clear_over);
             break;
 
         case 1:
@@ -350,6 +360,57 @@ void script_cb_draw_logo(struct ltx_Script_stu *script){
 
             break;
     }
+}
+
+// lcd 清屏脚本回调
+void script_cb_lcd_clear(struct ltx_Script_stu *script){
+    if(ltx_Script_get_triger_type(script) == SC_TRIGER_RESET){ // 外部要求此脚本重置，可在这里做释放资源等操作
+        // HAL_SPI_DMAStop(&hspi1_handler);
+        return ;
+    }
+    static uint8_t clear_trans_count = 0;
+    switch(script->step_now){
+        case 0: // 将 dma buffer 全填为 0
+            for(uint16_t i = 0; i < sizeof(lcd_buffer0); i ++){
+                lcd_buffer1[i] = 0;
+            }
+            ltx_Script_next_step_delay(script, script->step_now + 1, 0);
+            clear_trans_count = 0;
+
+            break;
+
+        case 1:
+            st7305_set_unit_window(&myLCD, 0, 0, LCD_UNIT_WIDTH-1, LCD_UNIT_HEIGHT-1);
+            st7305_write_data_dma(&myLCD, lcd_buffer1, 512);
+            ltx_Script_next_step_topic(script, script->step_now + 1, 20, &topic_spi_tx_over);
+
+            break;
+
+        case 2:
+            clear_trans_count ++;
+            if(clear_trans_count == 8){
+                
+                // st7305_write_data_dma(&myLCD, lcd_buffer1, 5);
+                // ltx_Script_next_step_topic(script, script->step_now + 1, 20, &topic_spi_tx_over);
+                st7305_write_data(&myLCD, lcd_buffer1, 29);
+                ltx_Script_next_step_delay(script, script->step_now + 1, 0);
+
+                return;
+            }
+            st7305_write_data_dma(&myLCD, lcd_buffer1, 512);
+            ltx_Script_next_step_topic(script, script->step_now, 20, &topic_spi_tx_over);
+
+            break;
+
+        default:
+            // 结束脚本
+            ltx_Script_next_step_over(script);
+            // 发布清屏完成话题
+            ltx_Topic_publish(&topic_lcd_clear_over);
+
+            break;
+    }
+
 }
 
 // spi dma 发送完成回调

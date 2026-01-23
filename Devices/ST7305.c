@@ -177,6 +177,7 @@ lcd_init_seq_stu st7305_init_table[] = {
     {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0x00}}, // VSHP1; VSLP1 ; VSHN1 ; VSLN1
 
     {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x36}}, // Memory Data Access Control
+    // {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0x00}}, //
     {LCD_CTRL_WRITE_DATA, 1, (const uint8_t []){0X48}}, //
 
     {LCD_CTRL_WRITE_CMD, 1, (const uint8_t []){0x3A}}, // Data Format Select

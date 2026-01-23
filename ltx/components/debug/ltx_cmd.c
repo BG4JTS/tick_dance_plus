@@ -626,19 +626,22 @@ Useage_fill_unit:
 }
 
 // 将某个 unit 绘制为传入的三个字节的参数，阻塞
-// 会进 hf，暂时不修
 void cmd_cb_draw_unit(uint8_t argc, char *argv[]){
     if(argc < 6){
         goto Useage_draw_unit;
     }
 
-    uint8_t unit_x, unit_y;
+    uint16_t unit_x, unit_y;
     uint8_t draw_buf[3];
+    uint32_t mid_val = 0;
     sscanf(argv[1], "%d", &unit_x);
     sscanf(argv[2], "%d", &unit_y);
-    sscanf(argv[3], "%x", draw_buf);
-    sscanf(argv[4], "%x", draw_buf+1);
-    sscanf(argv[5], "%x", draw_buf+2);
+    sscanf(argv[3], "0x%2x", &mid_val);
+    draw_buf[0] = mid_val;
+    sscanf(argv[4], "0x%2x", &mid_val);
+    draw_buf[1] = mid_val;
+    sscanf(argv[5], "0x%2x", &mid_val);
+    draw_buf[2] = mid_val;
 
     if(unit_x > 10 || unit_y > 124){
         LTX_LOG_WARN("unit not in range!\n");

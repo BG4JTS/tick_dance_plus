@@ -6,6 +6,8 @@
 #include "ST7305.h"
 #include "myAPP_device_init.h"
 #include "myAPP_system.h"
+#include "num_trans.h"
+#include "colon_trans.h"
 
 // 时间跳动偏移定时任务
 struct ltx_Task_stu task_tick_dance;
@@ -28,8 +30,8 @@ void script_cb_display_time(struct ltx_Script_stu *script);
 // APP 相关
 int myAPP_display_init(struct ltx_App_stu *app){
     // 创建时间跳动定时器
-    ltx_Task_init(&task_tick_dance, task_cb_tick_dance, 300, 0);
-    ltx_Task_add_to_app(&task_cb_tick_dance, app, "tick_dance");
+    ltx_Task_init(&task_tick_dance, task_cb_tick_dance, 200, 0);
+    ltx_Task_add_to_app(&task_tick_dance, app, "tick_dance");
 
 
     // 创建显示管理脚本
@@ -81,7 +83,7 @@ struct ltx_App_stu app_display = {
 uint8_t dance_offset = 0;
 // 时间跳动定时任务
 void task_cb_tick_dance(void *param){
-    // 每 300ms 自增一次偏移
+    // 每 200ms 自增一次偏移
     dance_offset = (dance_offset+1)%3;
     // 时间需要跳动，发布话题要求更新显示
     // ltx_Topic_publish(&topic_time_need_dance);
@@ -90,6 +92,8 @@ void task_cb_tick_dance(void *param){
 
 // 时间显示脚本
 void script_cb_display_time(struct ltx_Script_stu *script){
+    static RTC_TimeTypeDef rtc_time;
+
     if(ltx_Script_get_triger_type(script) == SC_TRIGER_RESET){ // 外部要求此脚本复位，可在此处做释放资源等操作
         HAL_SPI_DMAStop(&hspi1_handler);
         return ;
@@ -102,41 +106,66 @@ void script_cb_display_time(struct ltx_Script_stu *script){
             break;
 
         case 1: // 显示小时十位
+            HAL_RTC_GetTime(&hrtc_handler, &rtc_time, RTC_FORMAT_BIN);
+
+            st7305_set_unit_window(&myLCD, 2, 4, 9, 20);
+            st7305_write_data_dma(&myLCD, nums_trans[rtc_time.Hours/10][dance_offset], 408);
             
             ltx_Script_next_step_topic(script, script->step_now + 1, 10, &topic_spi_tx_over); // 等待刷新完成
             break;
 
         case 2: // 显示小时个位
+
+            st7305_set_unit_window(&myLCD, 2, 21, 9, 37);
+            st7305_write_data_dma(&myLCD, nums_trans[rtc_time.Hours%10][(dance_offset+1)%3], 408);
             
             ltx_Script_next_step_topic(script, script->step_now + 1, 10, &topic_spi_tx_over); // 等待刷新完成
             break;
 
         case 3: // 显示左冒号
+
+            st7305_set_unit_window(&myLCD, 3, 38, 8, 45);
+            st7305_write_data_dma(&myLCD, colon_trans[dance_offset], 144);
             
             ltx_Script_next_step_topic(script, script->step_now + 1, 10, &topic_spi_tx_over); // 等待刷新完成
             break;
 
         case 4: // 显示分钟十位
+
+            st7305_set_unit_window(&myLCD, 2, 46, 9, 62);
+            st7305_write_data_dma(&myLCD, nums_trans[rtc_time.Minutes/10][(dance_offset+2)%3], 408);
             
             ltx_Script_next_step_topic(script, script->step_now + 1, 10, &topic_spi_tx_over); // 等待刷新完成
             break;
 
         case 5: // 显示分钟个位
+
+            st7305_set_unit_window(&myLCD, 2, 63, 9, 79);
+            st7305_write_data_dma(&myLCD, nums_trans[rtc_time.Minutes%10][dance_offset], 408);
             
             ltx_Script_next_step_topic(script, script->step_now + 1, 10, &topic_spi_tx_over); // 等待刷新完成
             break;
 
         case 6: // 显示右冒号
+
+            st7305_set_unit_window(&myLCD, 3, 80, 8, 87);
+            st7305_write_data_dma(&myLCD, colon_trans[(dance_offset+1)%3], 144);
             
             ltx_Script_next_step_topic(script, script->step_now + 1, 10, &topic_spi_tx_over); // 等待刷新完成
             break;
 
         case 7: // 显示秒十位
+
+            st7305_set_unit_window(&myLCD, 2, 88, 9, 104);
+            st7305_write_data_dma(&myLCD, nums_trans[rtc_time.Seconds/10][(dance_offset+1)%3], 408);
             
             ltx_Script_next_step_topic(script, script->step_now + 1, 10, &topic_spi_tx_over); // 等待刷新完成
             break;
 
         case 8: // 显示秒个位
+
+            st7305_set_unit_window(&myLCD, 2, 105, 9, 121);
+            st7305_write_data_dma(&myLCD, nums_trans[rtc_time.Seconds%10][(dance_offset+2)%3], 408);
             
             ltx_Script_next_step_topic(script, 0, 10, &topic_spi_tx_over); // 等待刷新完成，刷新完成则进入等待下次定时器触发
             break;
@@ -150,11 +179,24 @@ void script_cb_display_time(struct ltx_Script_stu *script){
 // 显示管理脚本
 void script_cb_display_manager(struct ltx_Script_stu *script){
     switch(script->step_now){
-        case 0: // 刚开机，进时间显示
-            ltx_Script_reset(&script_cb_display_time, 0);
-            ltx_Script_resume(&script_cb_display_time);
+        case 0: // 刚开机，清屏 logo
+
+            // 运行清屏脚本并等待完成
+            ltx_Script_reset(&script_lcd_clear, 0);
+            ltx_Script_resume(&script_lcd_clear);
+
+            ltx_Script_next_step_topic(script, script->step_now + 1, 100, &topic_lcd_clear_over);
+            break;
+
+        case 1: // 时间显示
+            ltx_Script_reset(&script_display_time, 0);
+            ltx_Script_resume(&script_display_time);
 
             // ltx_Script_next_step_topic(script, 1, 0, &); // 等待按键切换状态
+            break;
+
+        case 2: // 时间设置
+
             break;
 
         default:

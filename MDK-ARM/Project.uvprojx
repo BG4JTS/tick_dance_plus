@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,PY32F030x8</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Drivers\CMSIS\Include;..\Drivers\PY32F0xx_HAL_Driver\Inc;..\Drivers\BSP\PY32F030xx_Start_Kit;..\Inc;..\Drivers\CMSIS\Device\PY32F0xx\Include;..\ltx\inc;..\ltx\components\app;..\ltx\components\debug;..\ltx\components\event_group;..\ltx\components\lock;..\ltx\components\log;..\ltx\components\script;..\Devices\Inc</IncludePath>
+              <IncludePath>..\Drivers\CMSIS\Include;..\Drivers\PY32F0xx_HAL_Driver\Inc;..\Drivers\BSP\PY32F030xx_Start_Kit;..\Inc;..\Drivers\CMSIS\Device\PY32F0xx\Include;..\ltx\inc;..\ltx\components\app;..\ltx\components\debug;..\ltx\components\event_group;..\ltx\components\lock;..\ltx\components\log;..\ltx\components\script;..\Devices\Inc;..\Fonts</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -423,6 +423,11 @@
               <FileName>myAPP_device_init.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\myAPP_device_init.c</FilePath>
+            </File>
+            <File>
+              <FileName>myAPP_display.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\myAPP_display.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -548,6 +553,21 @@
               <FileName>ST7305.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Devices\ST7305.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Fonts</GroupName>
+          <Files>
+            <File>
+              <FileName>num_trans.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Fonts\num_trans.c</FilePath>
+            </File>
+            <File>
+              <FileName>colon_trans.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Fonts\colon_trans.c</FilePath>
             </File>
           </Files>
         </Group>

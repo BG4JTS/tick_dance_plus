@@ -7,7 +7,7 @@
 #include "ltx_event_group.h"
 #include "ST7305.h"
 #include "myAPP_system.h"
-// #include "myAPP_display.h"
+#include "myAPP_display.h"
 
 // 所需初始化外部硬件完成事件
 #define EVENT_INIT_LCD_OVER         0x0001
@@ -59,7 +59,7 @@ struct st7305_stu myLCD = {
 
 // 显示屏初始化脚本对象结构体
 struct ltx_Script_stu script_lcd_init;
-// 绘制开机 logo 脚本
+// lcd 清屏脚本
 struct ltx_Script_stu script_lcd_clear;
 // 绘制开机 logo 脚本
 struct ltx_Script_stu script_draw_logo;
@@ -348,7 +348,7 @@ void script_cb_draw_logo(struct ltx_Script_stu *script){
             st7305_set_unit_window(&myLCD, x_x, x_y, x_x + x_w - 1, x_y + x_h - 1);
             st7305_write_data_dma(&myLCD, x_char_buffer, 504); // 1 个 unit 3 个字节
 
-            ltx_Script_next_step_delay(script, script->step_now + 1, 600); // logo 停留一段时间
+            ltx_Script_next_step_delay(script, script->step_now + 1, 300); // logo 停留一段时间
             break;
 
         default:
@@ -356,7 +356,9 @@ void script_cb_draw_logo(struct ltx_Script_stu *script){
             // 结束脚本
             ltx_Script_next_step_over(script);
             // 启动业务 app
-
+            // 启动显示 app
+            ltx_App_init(&app_display);
+            ltx_App_resume(&app_display);
 
             break;
     }

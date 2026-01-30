@@ -50,6 +50,8 @@ extern DMA_HandleTypeDef hdmaCh1_handler;
 
 extern RTC_HandleTypeDef hrtc_handler;
 
+extern TIM_HandleTypeDef htim1_handler;
+
 extern struct ltx_Lock_stu lock_debounce;
 
 extern struct ltx_Topic_stu topic_te;

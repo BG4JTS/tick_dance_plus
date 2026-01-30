@@ -314,7 +314,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>2</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -493,6 +493,16 @@
               <FileName>py32f0xx_hal_rtc_ex.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Drivers\PY32F0xx_HAL_Driver\Src\py32f0xx_hal_rtc_ex.c</FilePath>
+            </File>
+            <File>
+              <FileName>py32f0xx_hal_tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\PY32F0xx_HAL_Driver\Src\py32f0xx_hal_tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>py32f0xx_hal_tim_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\PY32F0xx_HAL_Driver\Src\py32f0xx_hal_tim_ex.c</FilePath>
             </File>
           </Files>
         </Group>

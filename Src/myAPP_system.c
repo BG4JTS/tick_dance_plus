@@ -5,8 +5,8 @@
 #include "ltx_log.h"
 #include "ltx_cmd.h"
 
-void task_func_heart_beat(void *param);
-void task_func_cmd(void *param);
+void task_func_heart_beat(struct ltx_Task_stu *task);
+void task_func_cmd(struct ltx_Task_stu *task);
 void subscriber_cb_sys_error(void *param);
 
 
@@ -81,7 +81,7 @@ struct ltx_App_stu app_system = {
 
 // 心拍任务
 uint32_t heart_beat_count = 0;
-void task_func_heart_beat(void *param){
+void task_func_heart_beat(struct ltx_Task_stu *task){
 
     heart_beat_count ++;
     // LTX_LOG_DEBG("Heartbeat: %d\n", heart_beat_count);
@@ -91,7 +91,7 @@ void task_func_heart_beat(void *param){
 
 uint8_t cmd_buffer[CMD_BUF_SIZE];
 // 处理命令任务
-void task_func_cmd(void *param){
+void task_func_cmd(struct ltx_Task_stu *task){
 
     // 读取命令
     if(SEGGER_RTT_HasData(0)){
@@ -113,7 +113,7 @@ void task_func_cmd(void *param){
 }
 
 // 系统错误码每秒打印周期任务
-void task_func_error_code(void *param){
+void task_func_error_code(struct ltx_Task_stu *task){
 
     LTX_LOG_ERRO("Error: 0x%08x, %s\n", SYS_ERROR_CODE, SYS_ERROR_MSG);
 }

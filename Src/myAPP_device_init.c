@@ -68,7 +68,7 @@ struct ltx_Script_stu script_draw_logo;
 // app 相关
 int myAPP_device_init_init(struct ltx_App_stu *app){
     // 创建显示屏初始脚本
-    ltx_Script_init(&script_lcd_init, script_cb_lcd_init, 0);
+    ltx_Script_init(&script_lcd_init, script_cb_lcd_init);
 
     // 创建所有外部硬件初始化完成事件组
     ltx_Event_group_init(&eventg_device_init_over, eventg_cb_device_init_over, EVENT_INIT_LCD_OVER, 10000); // 10s 超时时间
@@ -85,7 +85,7 @@ int myAPP_device_init_pause(struct ltx_App_stu *app){
 
 int myAPP_device_init_resume(struct ltx_App_stu *app){
 
-    ltx_Script_resume(&script_lcd_init);
+    ltx_Script_resume(&script_lcd_init, 0);
 
     return 0;
 }
@@ -253,10 +253,10 @@ void eventg_cb_device_init_over(struct ltx_Event_group_stu *eventg){
     ltx_App_destroy(&app_device_init);
 
     // 创建 lcd 清屏脚本
-    ltx_Script_init(&script_lcd_clear, script_cb_lcd_clear, 0);
+    ltx_Script_init(&script_lcd_clear, script_cb_lcd_clear);
     // 创建屏幕显示 logo 脚本并运行
-    ltx_Script_init(&script_draw_logo, script_cb_draw_logo, 0);
-    ltx_Script_resume(&script_draw_logo);
+    ltx_Script_init(&script_draw_logo, script_cb_draw_logo);
+    ltx_Script_resume(&script_draw_logo, 0);
 
     // 显示完 logo 再正式启动业务 app
     // 启动业务 app
@@ -302,8 +302,8 @@ void script_cb_draw_logo(struct ltx_Script_stu *script){
                 lcd_buffer0[i] = 0xFF;
             }
             // 运行清屏脚本并等待完成
-            ltx_Script_reset(&script_lcd_clear, 0);
-            ltx_Script_resume(&script_lcd_clear);
+            ltx_Script_reset(&script_lcd_clear);
+            ltx_Script_resume(&script_lcd_clear, 0);
             ltx_Script_next_step_topic(script, script->step_now + 1, 100, &topic_lcd_clear_over);
             break;
 

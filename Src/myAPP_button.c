@@ -22,9 +22,9 @@ struct ltx_Topic_stu topic_btn_b_longpress = _LTX_TOPIC_DEAFULT_CONFIG(topic_btn
 int myAPP_button_init(struct ltx_App_stu *app){
 
     // 创建按键 a 管理脚本
-    // ltx_Script_init(&script_button_a, script_cb_button_a, 0);
+    // ltx_Script_init(&script_button_a, script_cb_button_a);
     // 创建按键 b 管理脚本
-    ltx_Script_init(&script_button_b, script_cb_button_b, 0);
+    ltx_Script_init(&script_button_b, script_cb_button_b);
     
     return 0;
 }
@@ -39,8 +39,8 @@ int myAPP_button_pause(struct ltx_App_stu *app){
 
 int myAPP_button_resume(struct ltx_App_stu *app){
 
-    // ltx_Script_resume(&script_button_a);
-    ltx_Script_resume(&script_button_b);
+    // ltx_Script_resume(&script_button_a, 0);
+    ltx_Script_resume(&script_button_b, 0);
 
     return 0;
 }

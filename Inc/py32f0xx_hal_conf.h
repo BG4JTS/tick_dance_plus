@@ -52,7 +52,7 @@
 #define HAL_GPIO_MODULE_ENABLED    
 //#define HAL_IWDG_MODULE_ENABLED  
 //#define HAL_WWDG_MODULE_ENABLED 
-//#define HAL_TIM_MODULE_ENABLED 
+#define HAL_TIM_MODULE_ENABLED 
 #define HAL_DMA_MODULE_ENABLED
 //#define HAL_LPTIM_MODULE_ENABLED  
 #define HAL_PWR_MODULE_ENABLED
@@ -116,7 +116,7 @@
 #define  PRIORITY_HIGH                1
 #define  PRIORITY_LOW                 2
 #define  PRIORITY_LOWEST              3
-#define  TICK_INT_PRIORITY            ((uint32_t)PRIORITY_LOWEST)    /*!< tick interrupt priority (lowest by default)  */            
+#define  TICK_INT_PRIORITY            ((uint32_t)2)    /*!< tick interrupt priority (lowest by default)  */            
 #define  USE_RTOS                     0
 #define  PREFETCH_ENABLE              0
 

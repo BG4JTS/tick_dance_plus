@@ -46,6 +46,8 @@ DMA_HandleTypeDef hdmaCh1_handler;
 
 RTC_HandleTypeDef hrtc_handler;
 
+TIM_HandleTypeDef htim1_handler;
+
 // 消抖闹钟
 struct ltx_Lock_stu lock_debounce;
 
@@ -59,6 +61,7 @@ static void sys_clock_init(void);
 static void sys_spi1_init(void);
 static void sys_rtc_init(void);
 static void sys_button_init(void);
+static void sys_tim1_init(void);
 
 /**
  * @brief  Main program.
@@ -76,6 +79,7 @@ int main(void)
     sys_clock_init();
     sys_rtc_init();
     sys_spi1_init(); // 2MHz
+    // sys_tim1_init(); // 测试 tickless 模式下 systick 时间是否准确用
 
     // 中断按键初始化
     ltx_Lock_init(&lock_debounce, lock_cb_debounce_over);
@@ -213,8 +217,33 @@ static void sys_button_init(void){
     /* Enable EXTI interrupt */
     HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
     /* Configure interrupt priority */
-    HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(EXTI4_15_IRQn, 1, 0);
 }
+
+
+static void sys_tim1_init(void){
+    __HAL_RCC_TIM1_CLK_ENABLE();
+
+    htim1_handler.Instance = TIM1;                                           /* Select TIM1 */
+    htim1_handler.Init.Period            = 1000 - 1;                         /* Auto-reload value */
+    htim1_handler.Init.Prescaler         = 8000 - 1;                         /* Prescaler of 1000-1 */
+    htim1_handler.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;           /* No clock division */
+    htim1_handler.Init.CounterMode       = TIM_COUNTERMODE_UP;               /* Up counting */
+    htim1_handler.Init.RepetitionCounter = 1 - 1;                            /* No repetition counting */
+    htim1_handler.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;   /* Auto-reload register not buffered */
+    /* Initialize TIM1 */
+    if (HAL_TIM_Base_Init(&htim1_handler) != HAL_OK)
+    {
+        APP_ErrorHandler();
+    }
+    
+    /* Start the TIM Base generation in interrupt mode */
+    if (HAL_TIM_Base_Start(&htim1_handler) != HAL_OK)
+    {
+        APP_ErrorHandler();
+    }
+}
+
 
 /**
  * @brief  This function is executed in case of error occurrence.
@@ -230,6 +259,14 @@ void APP_ErrorHandler(void)
         HAL_Delay(1000);
     }
 }
+
+
+#if 1
+// 开启 tickless 需要替换原有 HAL_GetTick
+uint32_t HAL_GetTick(void){
+    return ltx_Sys_get_tick();
+}
+#endif
 
 #ifdef USE_FULL_ASSERT
 /**

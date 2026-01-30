@@ -125,7 +125,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
         /* Interrupt configuration */
-        HAL_NVIC_SetPriority(SPI1_IRQn, 1, 0);
+        HAL_NVIC_SetPriority(SPI1_IRQn, 0, 0);
         HAL_NVIC_EnableIRQ(SPI1_IRQn);
         /* DMA_CH1 configuration */
         hdmaCh1_handler.Instance = DMA1_Channel1;
@@ -150,7 +150,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef *hspi)
         __HAL_LINKDMA(hspi, hdmatx, hdmaCh1_handler);
 
         /* DMA interrupt configuration */
-        HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 1, 0);
+        HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
         HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
     }
 }

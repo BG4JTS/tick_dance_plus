@@ -48,11 +48,15 @@ RTC_HandleTypeDef hrtc_handler;
 
 TIM_HandleTypeDef htim1_handler;
 
+LPTIM_HandleTypeDef hlptim_handler = {0};
+
 // 消抖闹钟
 struct ltx_Lock_stu lock_debounce;
 
 // 屏幕同步信号
 struct ltx_Topic_stu topic_te = _LTX_TOPIC_DEAFULT_CONFIG(topic_te);
+
+uint8_t flag_tim1_init_over = 0;
 
 /* Private user code ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -62,6 +66,7 @@ static void sys_spi1_init(void);
 static void sys_rtc_init(void);
 static void sys_button_init(void);
 static void sys_tim1_init(void);
+static void sys_lptim_init(void);
 
 /**
  * @brief  Main program.
@@ -69,6 +74,7 @@ static void sys_tim1_init(void);
  */
 int main(void)
 {
+    NVIC_SetPriority(PendSV_IRQn, 3);
     ltx_Log_init();
     LTX_LOG_STR("\n\nSYSTEM START\n\n");
 
@@ -79,7 +85,13 @@ int main(void)
     sys_clock_init();
     sys_rtc_init();
     sys_spi1_init(); // 2MHz
-    // sys_tim1_init(); // 测试 tickless 模式下 systick 时间是否准确用
+#ifdef USE_OTHER_TIM_FOR_SYSTICK
+    sys_tim1_init(); // 替换 systick 用
+
+    HAL_SuspendTick();
+#else
+    NVIC_SetPriority(SysTick_IRQn, 2);
+#endif
 
     // 中断按键初始化
     ltx_Lock_init(&lock_debounce, lock_cb_debounce_over);
@@ -108,6 +120,7 @@ int main(void)
     LTX_LOG_INFO("Start idle task...\n");
     while (1){
         // 进入休眠
+        // __DSB();
         __WFI();
     }
 }
@@ -147,6 +160,19 @@ static void sys_clock_init(void)
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;                                              /* APB  clock not divided */
     /* Configure clock source */
     if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+    {
+        APP_ErrorHandler();
+    }
+}
+
+static void sys_lptim_init(void)
+{
+    /* LPTIM configuration */
+    hlptim_handler.Instance = LPTIM;                         /* LPTIM */
+    hlptim_handler.Init.Prescaler = LPTIM_PRESCALER_DIV128;  /* Prescaler: 128 */
+    hlptim_handler.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE; /* Immediate update mode */
+    /* Initialize LPTIM */
+    if (HAL_LPTIM_Init(&hlptim_handler) != HAL_OK)
     {
         APP_ErrorHandler();
     }
@@ -224,24 +250,29 @@ static void sys_button_init(void){
 static void sys_tim1_init(void){
     __HAL_RCC_TIM1_CLK_ENABLE();
 
-    htim1_handler.Instance = TIM1;                                           /* Select TIM1 */
-    htim1_handler.Init.Period            = 1000 - 1;                         /* Auto-reload value */
-    htim1_handler.Init.Prescaler         = 8000 - 1;                         /* Prescaler of 1000-1 */
-    htim1_handler.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;           /* No clock division */
-    htim1_handler.Init.CounterMode       = TIM_COUNTERMODE_UP;               /* Up counting */
+    htim1_handler.Instance = TIM1;
+    htim1_handler.Init.Period            = 10 - 1; // 每毫秒 10 个计数
+    htim1_handler.Init.Prescaler         = 800 - 1;
+    htim1_handler.Init.ClockDivision     = TIM_CLOCKDIVISION_DIV1;
+    htim1_handler.Init.CounterMode       = TIM_COUNTERMODE_DOWN;
     htim1_handler.Init.RepetitionCounter = 1 - 1;                            /* No repetition counting */
-    htim1_handler.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;   /* Auto-reload register not buffered */
+    htim1_handler.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     /* Initialize TIM1 */
     if (HAL_TIM_Base_Init(&htim1_handler) != HAL_OK)
     {
         APP_ErrorHandler();
     }
     
-    /* Start the TIM Base generation in interrupt mode */
-    if (HAL_TIM_Base_Start(&htim1_handler) != HAL_OK)
+    /* Start the TIM Base generation in interrupt mode (use IT) */
+    if (HAL_TIM_Base_Start_IT(&htim1_handler) != HAL_OK)
     {
         APP_ErrorHandler();
     }
+
+    // 使用单次计数（One Pulse Mode），计到 ARR 自动停止
+    TIM1->CR1 |= TIM_CR1_OPM;
+
+    flag_tim1_init_over = 1;
 }
 
 
@@ -261,8 +292,17 @@ void APP_ErrorHandler(void)
 }
 
 
-#if 1
 // 开启 tickless 需要替换原有 HAL_GetTick
+#ifdef USE_OTHER_TIM_FOR_SYSTICK
+extern __IO uint32_t uwTick;
+uint32_t HAL_GetTick(void){
+    if(flag_tim1_init_over){
+        return ltx_Sys_get_tick();
+    }else {
+        return uwTick;
+    }    
+}
+#else
 uint32_t HAL_GetTick(void){
     return ltx_Sys_get_tick();
 }

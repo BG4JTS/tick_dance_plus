@@ -44,13 +44,19 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* Private defines -----------------------------------------------------------*/
+
+// 使用其他定时器作为 systick 的话
+// #define USE_OTHER_TIM_FOR_SYSTICK
+
 /* Exported variables prototypes ---------------------------------------------*/
 extern SPI_HandleTypeDef hspi1_handler;
 extern DMA_HandleTypeDef hdmaCh1_handler;
 
 extern RTC_HandleTypeDef hrtc_handler;
 
+#ifdef USE_OTHER_TIM_FOR_SYSTICK
 extern TIM_HandleTypeDef htim1_handler;
+#endif
 
 extern struct ltx_Lock_stu lock_debounce;
 

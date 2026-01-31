@@ -13,6 +13,7 @@ typedef uint16_t UsType_t;
 
 // 选择一个对应架构的配置文件
 #include "ltx_arch_arm_cortex_m.h"
+// #include "ltx_arch_arm_cortex_m_tim.h"
 // #include "ltx_arch_xxx.h"
 
 

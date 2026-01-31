@@ -180,7 +180,9 @@ void SysTick_Handler(void)
 {
     HAL_IncTick();
 
+#ifndef USE_OTHER_TIM_FOR_SYSTICK
     ltx_Sys_tick_tack();
+#endif
 }
 
 /******************************************************************************/
@@ -230,5 +232,22 @@ void EXTI4_15_IRQHandler(void){
 
 }
 
+
+#ifdef USE_OTHER_TIM_FOR_SYSTICK
+/**
+  * @brief This function handles TIM1 Interrupt .
+  */
+void TIM1_BRK_UP_TRG_COM_IRQHandler(void)
+{
+    HAL_TIM_IRQHandler(&htim1_handler);
+    // ltx_Sys_tick_tack();
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    //   __HAL_TIM_SET_AUTORELOAD(&TimHandle, 6400 - 1);
+    ltx_Sys_tick_tack();
+}
+#endif
 
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

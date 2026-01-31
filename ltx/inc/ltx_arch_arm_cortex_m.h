@@ -31,10 +31,9 @@
     #define _ltx_Sys_systick_get_reload()       (SysTick->LOAD)
     // 清除 systick 计数值为重载值
     #define _ltx_Sys_systick_clr_val()          (SysTick->VAL = 0UL)
-    // #define _ltx_Sys_systick_clr_val()          do{SysTick->VAL = 0UL; SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_ENABLE_Msk;}while(0)
     // 获取 systick 计数值
     #define _ltx_Sys_systick_get_val()          (SysTick->VAL)
-    // 获取 systick 中断标志位，用于判断是否溢出/重载
+    // 获取 systick 中断标志位，用于判断是否溢出/重载，但是 arm 的 systick 中断标志位会在读取完后被清除
     #define _ltx_Sys_systick_get_flag()         (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)
     // 清除 systick 中断标志位：COUNTFLAG 为只读位，需通过读取 CTRL 寄存器清除
     #define _ltx_Sys_systick_clr_flag()         ((void)SysTick->CTRL)

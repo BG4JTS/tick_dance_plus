@@ -233,4 +233,16 @@ void HAL_RTC_MspDeInit(RTC_HandleTypeDef *hrtc)
     __HAL_RCC_RTC_DISABLE();
 }
 
+
+void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
+{
+    /* Enable TIM1 clock */
+    __HAL_RCC_TIM1_CLK_ENABLE();
+    
+    /* Set interrupt priority */
+    HAL_NVIC_SetPriority(TIM1_BRK_UP_TRG_COM_IRQn, 2, 0);
+    /* Enable TIM1 interrupt */
+    HAL_NVIC_EnableIRQ(TIM1_BRK_UP_TRG_COM_IRQn);
+}
+
 /************************ (C) COPYRIGHT Puya *****END OF FILE******************/

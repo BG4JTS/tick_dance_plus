@@ -186,22 +186,21 @@ void HAL_RTC_MspInit(RTC_HandleTypeDef *hrtc)
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-    /* Configure LSE/LSI as RTC clock source */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI | RCC_OSCILLATORTYPE_LSE;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
-    RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+    RCC_OscInitStruct.LSEState = RCC_LSE_OFF;
     RCC_OscInitStruct.LSEDriver = RCC_LSEDRIVE_MEDIUM;
-    RCC_OscInitStruct.LSIState = RCC_LSI_OFF;
+    RCC_OscInitStruct.LSIState = RCC_LSI_ON;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
     {
         while(1){
-            LTX_LOG_ERRO("Config osc to LSE Failed!\n");
+            LTX_LOG_ERRO("Config osc to LSI Failed!\n");
             HAL_Delay(1000);
         }
     }
 
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
-    PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+    PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
     {
         while(1){

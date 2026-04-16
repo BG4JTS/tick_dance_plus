@@ -1,3 +1,18 @@
+# tick_dance_plus
+
+
+
+
+
+
+
+
+
+原项目：https://github.com/TiX233/tick_dance
+
+原项目README
+---
+
 # Tick Dance 时间跳动全反射小钟
 
 ![fm](./Pic/封面.jpg)
